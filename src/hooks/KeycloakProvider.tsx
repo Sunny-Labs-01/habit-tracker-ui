@@ -90,15 +90,10 @@ export function KeycloakProvider({ children }: PropsWithChildren) {
           clientId: KEYCLOAK_CLIENT_ID,
         });
 
-        // Initialize with PKCE (S256) flow
         const auth = await kc.init({
           onLoad: "check-sso",
           pkceMethod: "S256",
           checkLoginIframe: false,
-          silentCheckSsoRedirectUri:
-            typeof window !== "undefined"
-              ? `${window.location.origin}/silent-check-sso.html`
-              : undefined,
         });
 
         setKeycloak(kc);

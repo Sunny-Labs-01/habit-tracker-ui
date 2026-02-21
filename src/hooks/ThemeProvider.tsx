@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, PropsWithChildren, useContext, useState } from "react";
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { ThemeProvider as MuiThemeProvider, createTheme } from "@mui/material";
 
 type ThemeMode = "light" | "dark";
@@ -15,11 +21,34 @@ const ThemeContext = createContext<ThemeContextType>({
   toggleTheme: () => {},
 });
 
+function subscribe(callback: () => void) {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", callback);
+  return () => mq.removeEventListener("change", callback);
+}
+
+function getSnapshot(): ThemeMode {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function getServerSnapshot(): ThemeMode {
+  return "light";
+}
+
 export function HabitTrackerThemeProvider({ children }: PropsWithChildren) {
-  const [mode, setMode] = useState<ThemeMode>("light");
+  const systemMode = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
+  const [userOverride, setUserOverride] = useState<ThemeMode | null>(null);
+
+  const mode = userOverride ?? systemMode;
 
   const toggleTheme = () => {
-    setMode((prev) => (prev === "light" ? "dark" : "light"));
+    setUserOverride(mode === "light" ? "dark" : "light");
   };
 
   const theme = createTheme({
