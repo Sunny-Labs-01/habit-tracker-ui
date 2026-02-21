@@ -40,12 +40,8 @@ export default function UserMenu() {
     handleClose();
     // Open Keycloak account management in new tab
     const keycloakUrl =
-      process.env.NEXT_PUBLIC_KEYCLOAK_URL ||
-      "https://kc.lab.ishtiaquezafar.com";
-    window.open(
-      `${keycloakUrl}/realms/habit-tracker/account`,
-      "_blank"
-    );
+      process.env.NEXT_PUBLIC_KEYCLOAK_URL || "http://localhost:8080";
+    window.open(`${keycloakUrl}/realms/habit-tracker/account`, "_blank");
   };
 
   // Loading state
