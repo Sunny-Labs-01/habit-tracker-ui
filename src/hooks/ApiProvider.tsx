@@ -5,9 +5,10 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import {
   CreateHabitInputs,
   Habit,
@@ -28,6 +29,7 @@ import {
   mapToHabit,
   mapToTrackingEntry,
 } from "@/utils/api";
+import { useKeycloak } from "./KeycloakProvider";
 
 // API Configuration
 const API_BASE_URL =
@@ -71,20 +73,33 @@ const ApiContext = createContext<ApiContextType>({
 });
 
 export function ApiProvider({ children }: PropsWithChildren) {
+  const { token, authenticated } = useKeycloak();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [trackingEntries, setTrackingEntries] = useState<TrackingEntry[]>([]);
   const [dailyScores, setDailyScores] = useState<DailyScore[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  // Helper function to make API calls with common headers
-  const apiRequest = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-      "Content-Type": "application/json",
-      "x-request-id": generateRequestId(),
-    },
-  });
+  // Create axios instance with auth token
+  const apiRequest: AxiosInstance = useMemo(() => {
+    const instance = axios.create({
+      baseURL: API_BASE_URL,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Add request interceptor to attach token and request ID
+    instance.interceptors.request.use((config) => {
+      config.headers["x-request-id"] = generateRequestId();
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    return instance;
+  }, [token]);
 
   // Error handler
   const handleError = (err: unknown): string => {
@@ -281,11 +296,13 @@ export function ApiProvider({ children }: PropsWithChildren) {
     await Promise.all([getHabits(), getTracking(), getDailyScores()]);
   };
 
-  // Load initial data
+  // Load initial data only when authenticated
   useEffect(() => {
-    refreshAll();
+    if (authenticated) {
+      refreshAll();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authenticated, apiRequest]);
 
   return (
     <ApiContext.Provider
