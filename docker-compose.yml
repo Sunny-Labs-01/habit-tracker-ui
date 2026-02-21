@@ -1,0 +1,65 @@
+# Habit Tracker UI Docker Compose File for Portainer
+# DO NOT USE THIS FILE FOR LOCAL DEVELOPMENT
+services:
+  habit-tracker-ui:
+    # Use the image we just pushed to GHCR
+    image: ghcr.io/sunny-labs-01/habit-tracker-ui
+    container_name: habit-tracker-ui
+    restart: unless-stopped
+
+    # Port mapping - expose container port 3002 to host
+    ports:
+      - "3005:3005"
+
+    # Environment variables - Portainer will inject these from your stack environment
+    environment:
+      # Server Configuration
+      - HOSTNAME=${HOSTNAME:-0.0.0.0}
+      - PORT=${PORT:-3005}
+      - NODE_ENV=${NODE_ENV:-production}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_KEYCLOAK_URL=${NEXT_PUBLIC_KEYCLOAK_URL:-http://localhost:8080}
+
+    # Volume mounting - use named volume for persistent data
+    volumes:
+      - habit-tracker-ui:/app/data
+      # If you need to persist logs or other app data, you can add more mounts here
+      # - habit-tracker-ui:/usr/app/logs
+
+    # Health check to ensure the service is running properly
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://0.0.0.0:3005/health",
+        ]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Optional: Add labels for better organization in Portainer
+    labels:
+      - "traefik.enable=false" # Disable if you're not using Traefik
+      - "app.name=habit-tracker-ui"
+      - "app.description=Habit Tracker UI"
+      - "app.version=latest"
+
+# Named volumes definition
+volumes:
+  habit-tracker-ui:
+    driver: local
+    # Optional: Specify driver options for better control
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /path/to/host/directory
+
+# Optional: Networks for better isolation
+networks:
+  default:
+    name: habit-tracker-ui-network
