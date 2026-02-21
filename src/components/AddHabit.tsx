@@ -21,8 +21,6 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
   const { createHabit } = useApi();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [weeklyGoal, setWeeklyGoal] = useState("");
-  const [monthlyGoal, setMonthlyGoal] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -36,10 +34,6 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
       await createHabit({
         name: name.trim(),
         description: description.trim() || undefined,
-        goals: {
-          weekly: weeklyGoal ? parseInt(weeklyGoal) : undefined,
-          monthly: monthlyGoal ? parseInt(monthlyGoal) : undefined,
-        },
       });
       handleClose();
     } catch (error) {
@@ -52,8 +46,6 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
   const handleClose = () => {
     setName("");
     setDescription("");
-    setWeeklyGoal("");
-    setMonthlyGoal("");
     onClose();
   };
 
@@ -76,22 +68,6 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
             fullWidth
             multiline
             rows={3}
-          />
-          <TextField
-            label="Weekly Goal (days per week)"
-            type="number"
-            value={weeklyGoal}
-            onChange={(e) => setWeeklyGoal(e.target.value)}
-            fullWidth
-            inputProps={{ min: 1, max: 7 }}
-          />
-          <TextField
-            label="Monthly Goal (days per month)"
-            type="number"
-            value={monthlyGoal}
-            onChange={(e) => setMonthlyGoal(e.target.value)}
-            fullWidth
-            inputProps={{ min: 1, max: 31 }}
           />
         </Box>
       </DialogContent>

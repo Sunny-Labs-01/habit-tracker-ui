@@ -34,11 +34,10 @@ export type HttpHabit = {
   updated_at: string;
 };
 
-// Create inputs
+// Create inputs (goals not supported on create - use update after creation)
 export type CreateHabitInputs = {
   name: string;
   description?: string;
-  goals?: HabitGoal;
 };
 
 // Update inputs
