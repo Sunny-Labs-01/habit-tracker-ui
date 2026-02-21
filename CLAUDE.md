@@ -49,18 +49,21 @@ src/
 ## Key Features
 
 ### Habit Management
+
 - Create, update, delete habits
 - Set weekly/monthly goals
 - Manage habit states (active, paused, stopped, pending)
 - Status transitions: start → pause → resume → stop
 
 ### Habit Tracking
+
 - Monthly calendar view (X-axis: days, Y-axis: habits)
 - Check off habits only for TODAY (past/future dates are read-only)
 - Visual indicators for current day
 - Persistent tracking data
 
 ### Scores
+
 - **Daily Score:** Completion percentage for today
 - **Weekly Score:** Last 7 days aggregated
 - **Monthly Score:** Current month aggregated
@@ -68,7 +71,7 @@ src/
 ## Essential Commands
 
 ```bash
-npm run dev      # Start dev server on port 3004 (with Turbopack)
+npm run dev      # Start dev server on port 3005 (with Turbopack)
 npm run build    # Production build
 npm run start    # Run production server
 npm run lint     # Run ESLint + TypeScript checks
@@ -79,12 +82,14 @@ npm run lint     # Run ESLint + TypeScript checks
 Uses React Context (`ApiProvider`) for global state. All components access via `useApi()` hook.
 
 **Key state slices:**
+
 - `habits` - All habits
 - `trackingEntries` - Tracking history
 - `dailyScores` - Score history
 - `loading`, `error` - UI state
 
 **API methods:**
+
 - `createHabit`, `updateHabit`, `deleteHabit`
 - `updateHabitStatus` (start/pause/resume/stop)
 - `createTracking`, `getTracking`
@@ -110,6 +115,7 @@ All dates use Luxon with English locale.
 **Formatters:** `src/utils/datetime.ts:14-60`
 
 **Key functions:**
+
 - `getToday()` - Current date in YYYY-MM-DD
 - `isToday(date)` - Check if date is today
 - `getDaysInMonth(year, month)` - Array of all dates in month

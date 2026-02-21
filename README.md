@@ -47,7 +47,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The app will be available at `http://localhost:3004`.
+The app will be available at `http://localhost:3005`.
 
 ### Environment Variables
 
@@ -58,7 +58,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3000  # Backend API URL
 ## Available Scripts
 
 ```bash
-npm run dev      # Start development server (port 3004)
+npm run dev      # Start development server (port 3005)
 npm run build    # Build for production
 npm run start    # Start production server
 npm run lint     # Run ESLint and TypeScript checks
@@ -101,6 +101,7 @@ habit-tracker-ui/
 This frontend connects to the [habit-tracker-be](https://github.com/Sunny-Labs-01/habit-tracker-be) backend.
 
 **API Endpoints Used:**
+
 - `GET/POST/PUT/DELETE /api/habits` - Habit management
 - `POST /api/habits/:id/status` - Status updates
 - `GET/POST /api/tracking` - Tracking entries
