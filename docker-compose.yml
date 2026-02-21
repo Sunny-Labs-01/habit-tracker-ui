@@ -12,13 +12,13 @@ services:
       - "3005:3005"
 
     # Environment variables - Portainer will inject these from your stack environment
+    # NOTE: NEXT_PUBLIC_* variables are baked into the JS bundle at build time and
+    # cannot be changed here. Pass them as Docker build args when building the image.
     environment:
       # Server Configuration
       - HOSTNAME=${HOSTNAME:-0.0.0.0}
       - PORT=${PORT:-3005}
       - NODE_ENV=${NODE_ENV:-production}
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
-      - NEXT_PUBLIC_KEYCLOAK_URL=${NEXT_PUBLIC_KEYCLOAK_URL:-http://localhost:8080}
 
     # Volume mounting - use named volume for persistent data
     volumes:

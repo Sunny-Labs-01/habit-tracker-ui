@@ -12,7 +12,7 @@ import Keycloak from "keycloak-js";
 
 // Keycloak Configuration
 const KEYCLOAK_URL =
-  process.env.NEXT_PUBLIC_KEYCLOAK_URL || "https://kc.lab.ishtiaquezafar.com";
+  process.env.NEXT_PUBLIC_KEYCLOAK_URL || "http://localhost:8080";
 const KEYCLOAK_REALM = "habit-tracker";
 const KEYCLOAK_CLIENT_ID = "habit-tracker-ui";
 
@@ -150,7 +150,7 @@ export function KeycloakProvider({ children }: PropsWithChildren) {
       } catch (err) {
         console.error("Keycloak initialization failed:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to initialize Keycloak"
+          err instanceof Error ? err.message : "Failed to initialize Keycloak",
         );
         setLoading(false);
       }
@@ -170,7 +170,8 @@ export function KeycloakProvider({ children }: PropsWithChildren) {
   const logout = useCallback(() => {
     if (keycloak) {
       keycloak.logout({
-        redirectUri: typeof window !== "undefined" ? window.location.origin : undefined,
+        redirectUri:
+          typeof window !== "undefined" ? window.location.origin : undefined,
       });
     }
   }, [keycloak]);
