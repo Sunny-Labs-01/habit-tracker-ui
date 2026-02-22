@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Box, Button, Container, Typography } from "@mui/material";
-import { Plus } from "lucide-react";
+import { BarChart3, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import HabitList from "@/components/HabitList";
 import HabitTable from "@/components/HabitTable";
 import AddHabit from "@/components/AddHabit";
@@ -12,6 +13,7 @@ import { useKeycloak } from "@/hooks/KeycloakProvider";
 import AuthRequired from "@/components/AuthRequired";
 
 export default function Home() {
+  const router = useRouter();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const { authenticated, loading } = useKeycloak();
 
@@ -21,13 +23,22 @@ export default function Home() {
         <Typography variant="h3">Habit Tracker</Typography>
         <Box display="flex" alignItems="center" gap={2}>
           {authenticated && !loading && (
-            <Button
-              variant="contained"
-              startIcon={<Plus />}
-              onClick={() => setAddDialogOpen(true)}
-            >
-              Add Habit
-            </Button>
+            <>
+              <Button
+                variant="outlined"
+                startIcon={<BarChart3 />}
+                onClick={() => router.push("/habits")}
+              >
+                Stats
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<Plus />}
+                onClick={() => setAddDialogOpen(true)}
+              >
+                Add Habit
+              </Button>
+            </>
           )}
           <UserMenu />
         </Box>

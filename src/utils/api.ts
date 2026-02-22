@@ -17,6 +17,9 @@ export function mapToHabit(http: HttpHabit): Habit {
     description: http.description,
     status: http.status,
     goals: http.goals,
+    frequency: http.frequency,
+    emoji: http.emoji,
+    color: http.color,
     createdAt: http.created_at,
     updatedAt: http.updated_at,
   };

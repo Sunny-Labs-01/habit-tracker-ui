@@ -1,6 +1,7 @@
 "use client";
 
 import { useApi } from "@/hooks/ApiProvider";
+import { isHabitDueOnDate } from "@/types/habits";
 import { getDaysInMonth, isToday } from "@/utils/datetime";
 import {
   Box,
@@ -12,6 +13,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { DateTime } from "luxon";
@@ -19,12 +21,8 @@ import { useEffect, useState } from "react";
 
 export default function HabitTable() {
   const { habits, trackingEntries, createTracking, getTracking } = useApi();
-  const [selectedMonth] = useState<number>(
-    DateTime.now().month
-  );
-  const [selectedYear] = useState<number>(
-    DateTime.now().year
-  );
+  const [selectedMonth] = useState<number>(DateTime.now().month);
+  const [selectedYear] = useState<number>(DateTime.now().year);
 
   const days = getDaysInMonth(selectedYear, selectedMonth);
 
@@ -62,18 +60,25 @@ export default function HabitTable() {
     await getTracking({ startDate, endDate });
   };
 
+  // Filter to only active habits
+  const activeHabits = habits.filter((h) => h.status === "active");
+
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
-        Habit Tracker - {DateTime.fromObject({ month: selectedMonth }).toFormat("MMMM")} {selectedYear}
+        Habit Tracker -{" "}
+        {DateTime.fromObject({ month: selectedMonth }).toFormat("MMMM")}{" "}
+        {selectedYear}
       </Typography>
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Habit</TableCell>
+              <TableCell sx={{ minWidth: 150 }}>Habit</TableCell>
               {days.map((day) => {
-                const dayNum = DateTime.fromISO(day).day;
+                const dt = DateTime.fromISO(day);
+                const dayNum = dt.day;
+                const dayOfWeek = dt.toFormat("ccc");
                 const isTodayCell = isToday(day);
                 return (
                   <TableCell
@@ -83,22 +88,45 @@ export default function HabitTable() {
                       bgcolor: isTodayCell ? "primary.light" : "transparent",
                       color: isTodayCell ? "primary.contrastText" : "inherit",
                       fontWeight: isTodayCell ? "bold" : "normal",
+                      minWidth: 40,
+                      px: 0.5,
                     }}
                   >
-                    {dayNum}
+                    <Tooltip title={dayOfWeek} arrow>
+                      <span>{dayNum}</span>
+                    </Tooltip>
                   </TableCell>
                 );
               })}
             </TableRow>
           </TableHead>
           <TableBody>
-            {habits.map((habit) => (
+            {activeHabits.map((habit) => (
               <TableRow key={habit.id}>
-                <TableCell>{habit.name}</TableCell>
+                <TableCell>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    {habit.emoji && (
+                      <span style={{ fontSize: "1.1rem" }}>{habit.emoji}</span>
+                    )}
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        bgcolor: habit.color || "#22c55e",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography variant="body2" noWrap>
+                      {habit.name}
+                    </Typography>
+                  </Box>
+                </TableCell>
                 {days.map((day) => {
+                  const isDue = isHabitDueOnDate(habit, day);
                   const isCompleted = isHabitCompletedOnDate(habit.id, day);
                   const isTodayCell = isToday(day);
-                  const canEdit = isTodayCell;
+                  const canEdit = isTodayCell && isDue;
 
                   return (
                     <TableCell
@@ -107,15 +135,45 @@ export default function HabitTable() {
                       sx={{
                         bgcolor: isTodayCell
                           ? "primary.light"
-                          : "transparent",
+                          : !isDue
+                            ? "action.disabledBackground"
+                            : "transparent",
+                        px: 0.5,
                       }}
                     >
-                      <Checkbox
-                        checked={isCompleted}
-                        onChange={() => handleToggle(habit.id, day)}
-                        disabled={!canEdit}
-                        size="small"
-                      />
+                      {isDue ? (
+                        <Checkbox
+                          checked={isCompleted}
+                          onChange={() => handleToggle(habit.id, day)}
+                          disabled={!canEdit}
+                          size="small"
+                          sx={{
+                            p: 0.5,
+                            color: habit.color || "primary.main",
+                            "&.Mui-checked": {
+                              color: habit.color || "primary.main",
+                            },
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Typography
+                            variant="caption"
+                            color="text.disabled"
+                            sx={{ fontSize: "0.7rem" }}
+                          >
+                            —
+                          </Typography>
+                        </Box>
+                      )}
                     </TableCell>
                   );
                 })}
