@@ -1,25 +1,52 @@
 // Score Types
 
-// Internal camelCase type
+// Internal camelCase types
 export type DailyScore = {
   date: string;
-  totalHabits: number;
-  completedHabits: number;
+  completedCount: number;
+  totalCount: number;
   score: number;
-  percentage: number;
 };
 
-// API snake_case type
+export type WeeklyScore = {
+  year: number;
+  weekNumber: number;
+  completedCount: number;
+  totalCount: number;
+  score: number;
+};
+
+export type MonthlyScore = {
+  month: number;
+  year: number;
+  completedCount: number;
+  totalCount: number;
+  score: number;
+};
+
+// API snake_case types
 export type HttpDailyScore = {
   date: string;
-  total_habits: number;
-  completed_habits: number;
+  user_id: string;
+  completed_count: number;
+  total_count: number;
   score: number;
-  percentage: number;
 };
 
-// Weekly/Monthly score (same structure)
-export type WeeklyScore = DailyScore;
-export type MonthlyScore = DailyScore;
-export type HttpWeeklyScore = HttpDailyScore;
-export type HttpMonthlyScore = HttpDailyScore;
+export type HttpWeeklyScore = {
+  year: number;
+  week_number: number;
+  user_id: string;
+  completed_count: number;
+  total_count: number;
+  score: number;
+};
+
+export type HttpMonthlyScore = {
+  month: number;
+  year: number;
+  user_id: string;
+  completed_count: number;
+  total_count: number;
+  score: number;
+};

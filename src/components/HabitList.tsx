@@ -28,11 +28,8 @@ export default function HabitList() {
     }
   };
 
-  const handleStatusChange = async (
-    id: string,
-    action: "start" | "pause" | "resume" | "stop"
-  ) => {
-    await updateHabitStatus(id, { action });
+  const handleStatusChange = async (id: string, status: HabitStatus) => {
+    await updateHabitStatus(id, { status });
   };
 
   const handleDelete = async (id: string) => {
@@ -85,26 +82,17 @@ export default function HabitList() {
                   </Box>
                 </Box>
                 <Box display="flex" gap={1}>
-                  {habit.status === HabitStatus.PENDING && (
-                    <IconButton
-                      onClick={() => handleStatusChange(habit.id, "start")}
-                      color="success"
-                      size="small"
-                    >
-                      <Play size={18} />
-                    </IconButton>
-                  )}
                   {habit.status === HabitStatus.ACTIVE && (
                     <>
                       <IconButton
-                        onClick={() => handleStatusChange(habit.id, "pause")}
+                        onClick={() => handleStatusChange(habit.id, HabitStatus.PAUSED)}
                         color="warning"
                         size="small"
                       >
                         <Pause size={18} />
                       </IconButton>
                       <IconButton
-                        onClick={() => handleStatusChange(habit.id, "stop")}
+                        onClick={() => handleStatusChange(habit.id, HabitStatus.STOPPED)}
                         color="error"
                         size="small"
                       >
@@ -115,20 +103,29 @@ export default function HabitList() {
                   {habit.status === HabitStatus.PAUSED && (
                     <>
                       <IconButton
-                        onClick={() => handleStatusChange(habit.id, "resume")}
+                        onClick={() => handleStatusChange(habit.id, HabitStatus.ACTIVE)}
                         color="success"
                         size="small"
                       >
                         <RotateCcw size={18} />
                       </IconButton>
                       <IconButton
-                        onClick={() => handleStatusChange(habit.id, "stop")}
+                        onClick={() => handleStatusChange(habit.id, HabitStatus.STOPPED)}
                         color="error"
                         size="small"
                       >
                         <Square size={18} />
                       </IconButton>
                     </>
+                  )}
+                  {habit.status === HabitStatus.STOPPED && (
+                    <IconButton
+                      onClick={() => handleStatusChange(habit.id, HabitStatus.ACTIVE)}
+                      color="success"
+                      size="small"
+                    >
+                      <Play size={18} />
+                    </IconButton>
                   )}
                   <IconButton size="small">
                     <Edit size={18} />

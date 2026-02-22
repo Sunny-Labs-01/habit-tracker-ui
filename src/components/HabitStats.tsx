@@ -1,7 +1,7 @@
 "use client";
 
 import { useApi } from "@/hooks/ApiProvider";
-import { Habit, isHabitDueOnDate, cronToFrequencyOption } from "@/types/habits";
+import { Habit, HabitStatus, isHabitDueOnDate, cronToFrequencyOption } from "@/types/habits";
 import { getPastDays, getToday } from "@/utils/datetime";
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 import { Flame, Trophy, Target, Calendar } from "lucide-react";
@@ -40,7 +40,7 @@ export default function HabitStats({ habit }: HabitStatsProps) {
   const { habits, trackingEntries } = useApi();
 
   const stats = useMemo(() => {
-    const targetHabits = habit ? [habit] : habits.filter((h) => h.status === "active");
+    const targetHabits = habit ? [habit] : habits.filter((h) => h.status === HabitStatus.ACTIVE);
     const days = getPastDays(365); // Look back 1 year
     const today = getToday();
 
