@@ -60,6 +60,29 @@ export function isToday(date: string): boolean {
   return date === getToday();
 }
 
+// Get the start and end dates of the current year
+export function getCurrentYearRange(): { start: string; end: string } {
+  const year = DateTime.now().year;
+  return {
+    start: DateTime.fromObject({ year, month: 1, day: 1 }).toFormat(DATETIME_FORMATS.DATE),
+    end: DateTime.fromObject({ year, month: 12, day: 31 }).toFormat(DATETIME_FORMATS.DATE),
+  };
+}
+
+// Get all days in the current year (Jan 1 – Dec 31)
+export function getCurrentYearDays(): string[] {
+  const year = DateTime.now().year;
+  const start = DateTime.fromObject({ year, month: 1, day: 1 });
+  const end = DateTime.fromObject({ year, month: 12, day: 31 });
+  const days: string[] = [];
+  let current = start;
+  while (current <= end) {
+    days.push(current.toFormat(DATETIME_FORMATS.DATE));
+    current = current.plus({ days: 1 });
+  }
+  return days;
+}
+
 // Get past N days as array of date strings
 export function getPastDays(count: number): string[] {
   const days: string[] = [];

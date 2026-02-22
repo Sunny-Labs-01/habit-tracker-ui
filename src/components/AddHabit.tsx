@@ -8,7 +8,7 @@ import {
   frequencyToCron,
   HABIT_COLORS,
 } from "@/types/habits";
-import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Check } from "lucide-react";
 import {
   Box,
   Button,
@@ -36,11 +36,11 @@ type AddHabitProps = {
 export default function AddHabit({ open, onClose }: AddHabitProps) {
   const { createHabit } = useApi();
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [frequency, setFrequency] = useState<FrequencyOption>("daily");
   const [customDays, setCustomDays] = useState<number[]>([]);
   const [selectedColor, setSelectedColor] = useState<string>(HABIT_COLORS[0]);
   const [selectedEmoji, setSelectedEmoji] = useState("✅");
-  const [customizeOpen, setCustomizeOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -53,6 +53,7 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
       const cronPattern = frequencyToCron(frequency, customDays);
       await createHabit({
         name: name.trim(),
+        description: description.trim() || undefined,
         frequency: cronPattern,
         emoji: selectedEmoji,
         color: selectedColor,
@@ -67,11 +68,11 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
 
   const handleClose = () => {
     setName("");
+    setDescription("");
     setFrequency("daily");
     setCustomDays([]);
     setSelectedColor(HABIT_COLORS[0]);
     setSelectedEmoji("✅");
-    setCustomizeOpen(false);
     onClose();
   };
 
@@ -138,6 +139,17 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
                 ),
               },
             }}
+          />
+
+          {/* Description Input */}
+          <TextField
+            placeholder="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            fullWidth
+            multiline
+            minRows={2}
+            maxRows={4}
           />
 
           {/* Repeat Options */}
@@ -239,64 +251,42 @@ export default function AddHabit({ open, onClose }: AddHabitProps) {
             </Box>
           </Box>
 
-          {/* Customize Section (Collapsible) */}
+          {/* Emoji Selector */}
           <Box>
-            <Button
-              onClick={() => setCustomizeOpen(!customizeOpen)}
-              endIcon={customizeOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-              sx={{
-                textTransform: "none",
-                color: "text.secondary",
-                p: 0,
-                "&:hover": {
-                  bgcolor: "transparent",
-                  color: "text.primary",
-                },
-              }}
-            >
-              Customize
-            </Button>
-            <Collapse in={customizeOpen}>
-              <Box mt={2}>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Emoji
+            </Typography>
+            <Box display="flex" gap={0.5} flexWrap="wrap">
+              {DEFAULT_EMOJIS.map((emoji) => (
+                <IconButton
+                  key={emoji}
+                  onClick={() => setSelectedEmoji(emoji)}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    fontSize: "1.25rem",
+                    border:
+                      selectedEmoji === emoji
+                        ? "2px solid"
+                        : "1px solid transparent",
+                    borderColor:
+                      selectedEmoji === emoji ? "primary.main" : "transparent",
+                    bgcolor:
+                      selectedEmoji === emoji
+                        ? "action.selected"
+                        : "transparent",
+                    borderRadius: 1,
+                    "&:hover": {
+                      bgcolor: "action.hover",
+                    },
+                  }}
                 >
-                  Emoji
-                </Typography>
-                <Box display="flex" gap={0.5} flexWrap="wrap">
-                  {DEFAULT_EMOJIS.map((emoji) => (
-                    <IconButton
-                      key={emoji}
-                      onClick={() => setSelectedEmoji(emoji)}
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        fontSize: "1.25rem",
-                        border:
-                          selectedEmoji === emoji
-                            ? "2px solid"
-                            : "1px solid transparent",
-                        borderColor:
-                          selectedEmoji === emoji ? "primary.main" : "transparent",
-                        bgcolor:
-                          selectedEmoji === emoji
-                            ? "action.selected"
-                            : "transparent",
-                        borderRadius: 1,
-                        "&:hover": {
-                          bgcolor: "action.hover",
-                        },
-                      }}
-                    >
-                      {emoji}
-                    </IconButton>
-                  ))}
-                </Box>
-              </Box>
-            </Collapse>
+                  {emoji}
+                </IconButton>
+              ))}
+            </Box>
           </Box>
+
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>

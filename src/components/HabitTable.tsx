@@ -1,7 +1,7 @@
 "use client";
 
 import { useApi } from "@/hooks/ApiProvider";
-import { isHabitDueOnDate } from "@/types/habits";
+import { HabitStatus, isHabitDueOnDate } from "@/types/habits";
 import { getDaysInMonth, isToday } from "@/utils/datetime";
 import {
   Box,
@@ -30,7 +30,7 @@ export default function HabitTable() {
     // Load tracking data for the selected month
     const startDate = days[0];
     const endDate = days[days.length - 1];
-    getTracking({ startDate, endDate });
+    getTracking({ dateFrom: startDate, dateTo: endDate });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedMonth, selectedYear]);
 
@@ -57,11 +57,11 @@ export default function HabitTable() {
     // Refresh tracking data
     const startDate = days[0];
     const endDate = days[days.length - 1];
-    await getTracking({ startDate, endDate });
+    await getTracking({ dateFrom: startDate, dateTo: endDate });
   };
 
   // Filter to only active habits
-  const activeHabits = habits.filter((h) => h.status === "active");
+  const activeHabits = habits.filter((h) => h.status === HabitStatus.ACTIVE);
 
   return (
     <Box>

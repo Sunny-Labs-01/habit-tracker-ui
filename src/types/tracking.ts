@@ -27,9 +27,16 @@ export type CreateTrackingInputs = {
   completed: boolean;
 };
 
+// Update inputs
+export type UpdateTrackingInputs = {
+  id: string;
+  completed?: boolean;
+  note?: string;
+};
+
 // Get tracking filters
 export type GetTrackingFilters = {
   habitId?: string;
-  startDate?: string;
-  endDate?: string;
+  dateFrom?: string;
+  dateTo?: string;
 };

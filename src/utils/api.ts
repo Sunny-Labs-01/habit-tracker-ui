@@ -1,7 +1,14 @@
 // API Utility Functions
 import { Habit, HttpHabit } from "@/types/habits";
 import { HttpTrackingEntry, TrackingEntry } from "@/types/tracking";
-import { DailyScore, HttpDailyScore } from "@/types/scores";
+import {
+  DailyScore,
+  HttpDailyScore,
+  HttpWeeklyScore,
+  HttpMonthlyScore,
+  WeeklyScore,
+  MonthlyScore,
+} from "@/types/scores";
 
 // Generate unique request ID
 export function generateRequestId(): string {
@@ -29,7 +36,7 @@ export function mapToTrackingEntry(http: HttpTrackingEntry): TrackingEntry {
   return {
     id: http.id,
     habitId: http.habit_id,
-    date: http.date,
+    date: http.date.slice(0, 10), // API returns full ISO datetime; extract YYYY-MM-DD
     completed: http.completed,
     createdAt: http.created_at,
     updatedAt: http.updated_at,
@@ -39,9 +46,28 @@ export function mapToTrackingEntry(http: HttpTrackingEntry): TrackingEntry {
 export function mapToDailyScore(http: HttpDailyScore): DailyScore {
   return {
     date: http.date,
-    totalHabits: http.total_habits,
-    completedHabits: http.completed_habits,
+    completedCount: http.completed_count,
+    totalCount: http.total_count,
     score: http.score,
-    percentage: http.percentage,
+  };
+}
+
+export function mapToWeeklyScore(http: HttpWeeklyScore): WeeklyScore {
+  return {
+    year: http.year,
+    weekNumber: http.week_number,
+    completedCount: http.completed_count,
+    totalCount: http.total_count,
+    score: http.score,
+  };
+}
+
+export function mapToMonthlyScore(http: HttpMonthlyScore): MonthlyScore {
+  return {
+    month: http.month,
+    year: http.year,
+    completedCount: http.completed_count,
+    totalCount: http.total_count,
+    score: http.score,
   };
 }

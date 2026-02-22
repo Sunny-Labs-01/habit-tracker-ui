@@ -21,18 +21,18 @@ export default function ScoreDisplay() {
 
   // Calculate weekly score (last 7 days)
   const last7Days = dailyScores.slice(-7);
-  const weeklyTotal = last7Days.reduce((sum, s) => sum + s.completedHabits, 0);
-  const weeklyPossible = last7Days.reduce((sum, s) => sum + s.totalHabits, 0);
+  const weeklyTotal = last7Days.reduce((sum, s) => sum + s.completedCount, 0);
+  const weeklyPossible = last7Days.reduce((sum, s) => sum + s.totalCount, 0);
   const weeklyPercentage =
     weeklyPossible > 0 ? Math.round((weeklyTotal / weeklyPossible) * 100) : 0;
 
   // Calculate monthly score
   const monthlyTotal = dailyScores.reduce(
-    (sum, s) => sum + s.completedHabits,
+    (sum, s) => sum + s.completedCount,
     0
   );
   const monthlyPossible = dailyScores.reduce(
-    (sum, s) => sum + s.totalHabits,
+    (sum, s) => sum + s.totalCount,
     0
   );
   const monthlyPercentage =
@@ -46,10 +46,10 @@ export default function ScoreDisplay() {
         <CardContent>
           <Typography variant="h6">Today</Typography>
           <Typography variant="h3" color="primary">
-            {todayScore?.percentage || 0}%
+            {todayScore ? Math.round((todayScore.completedCount / todayScore.totalCount) * 100) || 0 : 0}%
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {todayScore?.completedHabits || 0} / {todayScore?.totalHabits || 0}{" "}
+            {todayScore?.completedCount || 0} / {todayScore?.totalCount || 0}{" "}
             habits
           </Typography>
         </CardContent>

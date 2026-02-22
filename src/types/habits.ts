@@ -1,10 +1,10 @@
 // Habit Types
 
 export enum HabitStatus {
-  ACTIVE = "active",
-  PAUSED = "paused",
-  STOPPED = "stopped",
-  PENDING = "pending",
+  ACTIVE = "ACTIVE",
+  PAUSED = "PAUSED",
+  STOPPED = "STOPPED",
+  ARCHIVED = "ARCHIVED",
 }
 
 export type HabitGoal = {
@@ -61,7 +61,7 @@ export type UpdateHabitInputs = {
 
 // Status update inputs
 export type UpdateHabitStatusInputs = {
-  action: "start" | "pause" | "resume" | "stop";
+  status: HabitStatus;
 };
 
 // Events

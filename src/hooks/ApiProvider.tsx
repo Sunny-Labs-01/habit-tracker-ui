@@ -18,6 +18,7 @@ import {
 } from "@/types/habits";
 import {
   CreateTrackingInputs,
+  UpdateTrackingInputs,
   GetTrackingFilters,
   HttpTrackingEntry,
   TrackingEntry,
@@ -29,6 +30,7 @@ import {
   mapToHabit,
   mapToTrackingEntry,
 } from "@/utils/api";
+import { getCurrentYearRange } from "@/utils/datetime";
 import { useKeycloak } from "./KeycloakProvider";
 
 // API Configuration
@@ -40,6 +42,7 @@ type ApiContextType = {
   trackingEntries: TrackingEntry[];
   dailyScores: DailyScore[];
   loading: boolean;
+  trackingLoaded: boolean;
   error?: string;
   createHabit: (data: CreateHabitInputs) => Promise<string>;
   updateHabit: (id: string, data: UpdateHabitInputs) => Promise<boolean>;
@@ -50,6 +53,7 @@ type ApiContextType = {
   ) => Promise<boolean>;
   getHabits: () => Promise<void>;
   createTracking: (data: CreateTrackingInputs) => Promise<string>;
+  updateTracking: (data: UpdateTrackingInputs) => Promise<boolean>;
   getTracking: (filters?: GetTrackingFilters) => Promise<void>;
   getDailyScores: (startDate?: string, endDate?: string) => Promise<void>;
   refreshAll: () => Promise<void>;
@@ -60,6 +64,7 @@ const ApiContext = createContext<ApiContextType>({
   trackingEntries: [],
   dailyScores: [],
   loading: false,
+  trackingLoaded: false,
   error: undefined,
   createHabit: async () => "",
   updateHabit: async () => false,
@@ -67,6 +72,7 @@ const ApiContext = createContext<ApiContextType>({
   updateHabitStatus: async () => false,
   getHabits: async () => {},
   createTracking: async () => "",
+  updateTracking: async () => false,
   getTracking: async () => {},
   getDailyScores: async () => {},
   refreshAll: async () => {},
@@ -78,6 +84,7 @@ export function ApiProvider({ children }: PropsWithChildren) {
   const [trackingEntries, setTrackingEntries] = useState<TrackingEntry[]>([]);
   const [dailyScores, setDailyScores] = useState<DailyScore[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [trackingLoaded, setTrackingLoaded] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
   // Create axios instance with auth token
@@ -201,9 +208,9 @@ export function ApiProvider({ children }: PropsWithChildren) {
     try {
       setLoading(true);
       setError(undefined);
-      const response = await apiRequest.post<{ data: HttpHabit }>(
+      const response = await apiRequest.put<{ data: HttpHabit }>(
         `/api/habits/${id}/status`,
-        data
+        { status: data.status }
       );
       const updatedHabit = mapToHabit(response.data.data);
       setHabits((prev) =>
@@ -228,15 +235,45 @@ export function ApiProvider({ children }: PropsWithChildren) {
       setError(undefined);
       const response = await apiRequest.post<{ data: HttpTrackingEntry }>(
         "/api/tracking",
-        data
+        { habit_id: data.habitId, date: data.date, completed: data.completed }
       );
       const entry = mapToTrackingEntry(response.data.data);
-      setTrackingEntries((prev) => [...prev, entry]);
+      setTrackingEntries((prev) => [
+        ...prev.filter(
+          (e) => !(e.habitId === entry.habitId && e.date === entry.date)
+        ),
+        entry,
+      ]);
       return entry.id;
     } catch (err) {
       const errorMsg = handleError(err);
       setError(errorMsg);
       throw new Error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateTracking = async (
+    data: UpdateTrackingInputs
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(undefined);
+      const response = await apiRequest.put<{ data: HttpTrackingEntry }>(
+        `/api/tracking/${data.id}`,
+        { completed: data.completed, note: data.note }
+      );
+      const entry = mapToTrackingEntry(response.data.data);
+      setTrackingEntries((prev) => [
+        ...prev.filter((e) => e.id !== entry.id),
+        entry,
+      ]);
+      return true;
+    } catch (err) {
+      const errorMsg = handleError(err);
+      setError(errorMsg);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -249,15 +286,16 @@ export function ApiProvider({ children }: PropsWithChildren) {
       setLoading(true);
       setError(undefined);
       const params = new URLSearchParams();
-      if (filters?.habitId) params.append("habitId", filters.habitId);
-      if (filters?.startDate) params.append("startDate", filters.startDate);
-      if (filters?.endDate) params.append("endDate", filters.endDate);
+      if (filters?.habitId) params.append("habit_id", filters.habitId);
+      if (filters?.dateFrom) params.append("date_from", filters.dateFrom);
+      if (filters?.dateTo) params.append("date_to", filters.dateTo);
 
       const response = await apiRequest.get<{ data: HttpTrackingEntry[] }>(
         `/api/tracking?${params.toString()}`
       );
       const entries = response.data.data.map(mapToTrackingEntry);
       setTrackingEntries(entries);
+      setTrackingLoaded(true);
     } catch (err) {
       const errorMsg = handleError(err);
       setError(errorMsg);
@@ -293,7 +331,12 @@ export function ApiProvider({ children }: PropsWithChildren) {
 
   // Refresh all data
   const refreshAll = async (): Promise<void> => {
-    await Promise.all([getHabits(), getTracking(), getDailyScores()]);
+    const { start, end } = getCurrentYearRange();
+    await Promise.all([
+      getHabits(),
+      getTracking({ dateFrom: start, dateTo: end }),
+      getDailyScores(),
+    ]);
   };
 
   // Load initial data only when authenticated
@@ -311,6 +354,7 @@ export function ApiProvider({ children }: PropsWithChildren) {
         trackingEntries,
         dailyScores,
         loading,
+        trackingLoaded,
         error,
         createHabit,
         updateHabit,
@@ -318,6 +362,7 @@ export function ApiProvider({ children }: PropsWithChildren) {
         updateHabitStatus,
         getHabits,
         createTracking,
+        updateTracking,
         getTracking,
         getDailyScores,
         refreshAll,
