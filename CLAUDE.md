@@ -130,6 +130,8 @@ npm run build  # Must succeed
 # Create PR to main
 ```
 
+> **Important:** Always run `git branch --show-current` to confirm you are on a feature branch before committing or merging. Never commit directly to `main`.
+
 ## Docker Build
 
 ```bash

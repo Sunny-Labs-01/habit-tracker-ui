@@ -8,10 +8,14 @@ import {
   Chip,
   Container,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Paper,
   Typography,
 } from "@mui/material";
-import { ArrowLeft, Flame, MoreVertical, Plus } from "lucide-react";
+import { Archive, ArrowLeft, Edit, Flame, MoreVertical, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/ApiProvider";
 import {
@@ -23,6 +27,7 @@ import {
 import HabitHeatmap from "@/components/HabitHeatmap";
 import HabitStats, { SingleHabitStats } from "@/components/HabitStats";
 import AddHabit from "@/components/AddHabit";
+import EditHabit from "@/components/EditHabit";
 import AuthRequired from "@/components/AuthRequired";
 import UserMenu from "@/components/UserMenu";
 import { getPastDays, getToday } from "@/utils/datetime";
@@ -91,9 +96,28 @@ function HabitCardStats({ habit }: { habit: Habit }) {
 
 export default function HabitsPage() {
   const router = useRouter();
-  const { habits } = useApi();
+  const { habits, updateHabitStatus } = useApi();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [menuState, setMenuState] = useState<{ anchor: HTMLElement; habit: Habit } | null>(null);
+
+  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>, habit: Habit) => {
+    e.stopPropagation();
+    setMenuState({ anchor: e.currentTarget, habit });
+  };
+
+  const handleMenuClose = () => setMenuState(null);
+
+  const handleEdit = () => {
+    if (menuState) setEditingHabit(menuState.habit);
+    handleMenuClose();
+  };
+
+  const handleArchive = async () => {
+    if (menuState) await updateHabitStatus(menuState.habit.id, { status: HabitStatus.ARCHIVED });
+    handleMenuClose();
+  };
 
   const activeHabits = habits.filter((h) => h.status !== HabitStatus.STOPPED);
 
@@ -191,7 +215,11 @@ export default function HabitsPage() {
         ) : (
           <Box display="flex" flexDirection="column" gap={2}>
             {activeHabits.map((habit) => (
-              <Card key={habit.id} sx={{ p: 2 }}>
+              <Card
+                key={habit.id}
+                sx={{ p: 2, cursor: "pointer" }}
+                onClick={() => setSelectedHabit(habit)}
+              >
                 {/* Card header row */}
                 <Box
                   display="flex"
@@ -266,8 +294,7 @@ export default function HabitsPage() {
                     <HabitCardStats habit={habit} />
                     <IconButton
                       size="small"
-                      onClick={() => setSelectedHabit(habit)}
-                      title="View details"
+                      onClick={(e) => handleMenuOpen(e, habit)}
                     >
                       <MoreVertical size={18} />
                     </IconButton>
@@ -285,6 +312,29 @@ export default function HabitsPage() {
           open={addDialogOpen}
           onClose={() => setAddDialogOpen(false)}
         />
+
+        {editingHabit && (
+          <EditHabit
+            open={!!editingHabit}
+            habit={editingHabit}
+            onClose={() => setEditingHabit(null)}
+          />
+        )}
+
+        <Menu
+          anchorEl={menuState?.anchor}
+          open={!!menuState}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleEdit}>
+            <ListItemIcon><Edit size={16} /></ListItemIcon>
+            <ListItemText>Edit</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={handleArchive}>
+            <ListItemIcon><Archive size={16} /></ListItemIcon>
+            <ListItemText>Archive</ListItemText>
+          </MenuItem>
+        </Menu>
       </AuthRequired>
     </Container>
   );

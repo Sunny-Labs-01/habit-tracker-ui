@@ -1,4 +1,5 @@
 // Habit Types
+import { DateTime } from "luxon";
 
 export enum HabitStatus {
   ACTIVE = "ACTIVE",
@@ -127,8 +128,7 @@ export function isHabitDueOnDate(habit: Habit, dateStr: string): boolean {
   if (parts.length !== 5) return true; // Default to due if invalid cron
   
   const dayOfWeek = parts[4];
-  const date = new Date(dateStr);
-  const jsDay = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const jsDay = DateTime.fromISO(dateStr).weekday % 7; // Luxon: 1=Mon…7=Sun → 0=Sun,1=Mon…6=Sat
   
   if (dayOfWeek === "*") return true;
   if (dayOfWeek === "1-5") return jsDay >= 1 && jsDay <= 5;
