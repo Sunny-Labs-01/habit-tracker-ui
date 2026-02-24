@@ -10,10 +10,13 @@ import {
   Typography,
 } from "@mui/material";
 import { Edit, Trash2, Play, Pause, Square, RotateCcw } from "lucide-react";
-import { HabitStatus } from "@/types/habits";
+import { Habit, HabitStatus } from "@/types/habits";
+import { useState } from "react";
+import EditHabit from "@/components/EditHabit";
 
 export default function HabitList() {
   const { habits, updateHabitStatus, deleteHabit } = useApi();
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
   const getStatusColor = (status: HabitStatus) => {
     switch (status) {
@@ -127,7 +130,7 @@ export default function HabitList() {
                       <Play size={18} />
                     </IconButton>
                   )}
-                  <IconButton size="small">
+                  <IconButton size="small" onClick={() => setEditingHabit(habit)}>
                     <Edit size={18} />
                   </IconButton>
                   <IconButton
@@ -142,6 +145,13 @@ export default function HabitList() {
             </CardContent>
           </Card>
         ))
+      )}
+      {editingHabit && (
+        <EditHabit
+          open={!!editingHabit}
+          habit={editingHabit}
+          onClose={() => setEditingHabit(null)}
+        />
       )}
     </Box>
   );
