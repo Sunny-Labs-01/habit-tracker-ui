@@ -48,7 +48,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=sha,prefix={{branch}}-
+            type=ref,event=pr
+            # On pull requests {{branch}} is empty and the tag would be "-<sha>"; keep the sha tag for pushes.
+            type=sha,prefix={{branch}}-,enable=${{ github.event_name == 'push' }}
             type=raw,value=latest,enable={{is_default_branch}}
 
       # Build and push Docker image to GHCR
