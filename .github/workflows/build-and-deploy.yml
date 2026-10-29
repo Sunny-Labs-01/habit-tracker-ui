@@ -1,10 +1,12 @@
 name: Build and Deploy to GHCR
 
-# Trigger this workflow when code is merged to main branch
+# Runs on every pull request to build the images (push: false) so a broken Dockerfile or
+# an invalid tag fails the PR, and on push to main to build and push them to GHCR.
 on:
+  pull_request:
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -12,7 +14,7 @@ env:
 
 jobs:
   build-and-deploy:
-    name: Build and Deploy Docker Image
+    name: Build image (push to GHCR on main)
     runs-on: ubuntu-latest
 
     # Required permissions for pushing to GHCR
@@ -31,6 +33,7 @@ jobs:
 
       # Log in to GitHub Container Registry
       - name: Log in to Container Registry
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -53,7 +56,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
