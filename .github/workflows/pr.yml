@@ -37,6 +37,10 @@ jobs:
   misspell:
     name: Misspell
     runs-on: ubuntu-latest
+    # reviewdog posts review comments; the default token here is read-only.
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
